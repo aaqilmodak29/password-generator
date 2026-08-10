@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'backup_page.dart';
 import 'password_generator_page.dart';
 import 'view_passwords.dart';
 
@@ -15,6 +16,7 @@ class _HomeNavState extends State<HomeNav> {
   final _pages = const [
     PasswordGeneratorPage(),
     ViewPasswords(),
+    BackupPage(),
   ];
 
   @override
@@ -35,6 +37,10 @@ class _HomeNavState extends State<HomeNav> {
           BottomNavigationBarItem(
             icon: Icon(Icons.list_alt),
             label: 'Passwords',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.backup),
+            label: 'Backup',
           ),
         ],
       ),

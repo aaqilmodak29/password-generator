@@ -38,10 +38,18 @@ class _ViewPasswordsState extends State<ViewPasswords> {
 
   @override
   void dispose() {
-    for (final c in _nameCtrl.values) c.dispose();
-    for (final c in _webNameCtrl.values) c.dispose();
-    for (final c in _urlCtrl.values) c.dispose();
-    for (final c in _pwdCtrl.values) c.dispose();
+    for (final c in _nameCtrl.values) {
+      c.dispose();
+    }
+    for (final c in _webNameCtrl.values) {
+      c.dispose();
+    }
+    for (final c in _urlCtrl.values) {
+      c.dispose();
+    }
+    for (final c in _pwdCtrl.values) {
+      c.dispose();
+    }
     _searchCtrl.dispose();
     super.dispose();
   }
@@ -346,10 +354,14 @@ class _ViewPasswordsState extends State<ViewPasswords> {
                                       icon: const Icon(Icons.copy),
                                       label: const Text("Copy"),
                                       onPressed: () async {
+                                        // Resolved before the await: afterwards
+                                        // this builder's context may be gone,
+                                        // and the State's `mounted` says
+                                        // nothing about it.
+                                        final messenger = ScaffoldMessenger.of(context);
                                         final toCopy = isEditing ? _pwdCtrl[p.id]!.text : p.pwd;
                                         await Clipboard.setData(ClipboardData(text: toCopy));
-                                        if (!mounted) return;
-                                        ScaffoldMessenger.of(context).showSnackBar(
+                                        messenger.showSnackBar(
                                           const SnackBar(content: Text("Password copied")),
                                         );
                                       },
