@@ -24,6 +24,16 @@ the device.
 > It is only a lookup name, but renaming it would orphan the key of every
 > existing install and make those databases unreadable, so it stays.
 
+Nothing in the startup path ever deletes the database. If the key cannot be
+read, or the database cannot be opened, the app **refuses to start and says
+so** rather than beginning again with an empty one. A new key is only ever
+generated when there is no database file at all — a genuine first run.
+
+That matters because the failure is otherwise invisible: an app that quietly
+recreates an empty database looks perfectly healthy, and you find out when you
+go looking for a password that is no longer there. If you ever see that error,
+**do not reinstall** — the data is still on the device and still recoverable.
+
 ## Layout
 
 ```
@@ -94,6 +104,9 @@ Cutting a release is one command:
 ```bash
 git tag v1.1.0 && git push origin v1.1.0
 ```
+
+Windows PowerShell has no `&&` operator, so there it is `git tag v1.1.0 ; git
+push origin v1.1.0`.
 
 That triggers `.github/workflows/release.yml`, which analyses, tests, builds a
 signed APK and publishes it as a release. `versionCode` comes from the workflow
