@@ -99,7 +99,7 @@ void main() {
           isA<BackupException>().having(
             (e) => e.message,
             'message',
-            contains('not a Password Generator backup'),
+            contains('not a Password Manager backup'),
           ),
         ),
       );

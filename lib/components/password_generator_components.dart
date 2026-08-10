@@ -13,6 +13,15 @@ extension StringExtensions on String {
   }
 }
 
+// These fields predate the app having a theme, so each one carried its own
+// colours: green prefix icons, red borders on every field whether or not it
+// was in error, and a hardcoded lavender fill that only worked in light mode.
+// The decoration now comes from InputDecorationTheme, so the fields match the
+// rest of the app and follow light and dark without being told.
+//
+// Spacing also moved out to the page. Each field padded itself with a slightly
+// different value, so the gaps between them were uneven.
+
 class EmailNameField extends StatefulWidget {
   const EmailNameField({super.key});
 
@@ -23,34 +32,20 @@ class EmailNameField extends StatefulWidget {
 class _EmailNameFieldState extends State<EmailNameField> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: TextFormField(
-          onChanged: (value) {
-            emailUser = value.isEmpty ? '' : value.toLowerCase().capitalize();
-          },
-          validator: (val) {
-            if(val!.isEmpty){
-              return 'Please enter an email or username.';
-            }
-            return null;
-          },
-          decoration: InputDecoration(
-              hintText: 'Username/Email',
-              labelText: 'Username/Email',
-              prefixIcon: Icon(
-                Icons.mail,
-                color: Colors.green,
-              ),
-              errorStyle: TextStyle(fontSize: 18.0),
-              border: OutlineInputBorder(
-                  borderSide:
-                  BorderSide(color: Colors.red),
-                  borderRadius: BorderRadius.all(
-                      Radius.circular(9.0)
-                  )
-              )
-          )
+    return TextFormField(
+      onChanged: (value) {
+        emailUser = value.isEmpty ? '' : value.toLowerCase().capitalize();
+      },
+      validator: (val) {
+        if (val == null || val.isEmpty) {
+          return 'Please enter an email or username.';
+        }
+        return null;
+      },
+      keyboardType: TextInputType.emailAddress,
+      decoration: const InputDecoration(
+        labelText: 'Username or email',
+        prefixIcon: Icon(Icons.person_outline),
       ),
     );
   }
@@ -66,34 +61,19 @@ class WebsiteField extends StatefulWidget {
 class _WebsiteFieldState extends State<WebsiteField> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: TextFormField(
-          onChanged: (value) {
-            websiteName = value.isEmpty ? '' : value.toLowerCase().capitalize();
-          },
-          validator: (val) {
-            if(val!.isEmpty){
-              return 'Please enter a website/app name.';
-            }
-            return null;
-          },
-          decoration: InputDecoration(
-              hintText: 'Website/App',
-              labelText: 'Website/App',
-              prefixIcon: Icon(
-                Icons.web_asset,
-                color: Colors.green,
-              ),
-              errorStyle: TextStyle(fontSize: 18.0),
-              border: OutlineInputBorder(
-                  borderSide:
-                  BorderSide(color: Colors.red),
-                  borderRadius: BorderRadius.all(
-                      Radius.circular(9.0)
-                  )
-              )
-          )
+    return TextFormField(
+      onChanged: (value) {
+        websiteName = value.isEmpty ? '' : value.toLowerCase().capitalize();
+      },
+      validator: (val) {
+        if (val == null || val.isEmpty) {
+          return 'Please enter a website or app name.';
+        }
+        return null;
+      },
+      decoration: const InputDecoration(
+        labelText: 'Website or app',
+        prefixIcon: Icon(Icons.apps_outlined),
       ),
     );
   }
@@ -109,28 +89,15 @@ class WebsiteURLField extends StatefulWidget {
 class _WebsiteURLFieldState extends State<WebsiteURLField> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12.0),
-      child: TextFormField(
-          onChanged: (value) {
-            websiteURL = value;
-          },
-          decoration: InputDecoration(
-              hintText: 'Website URL',
-              labelText: 'Website URL (Optional)',
-              prefixIcon: Icon(
-                Icons.web,
-                color: Colors.green,
-              ),
-              errorStyle: TextStyle(fontSize: 18.0),
-              border: OutlineInputBorder(
-                  borderSide:
-                  BorderSide(color: Colors.red),
-                  borderRadius: BorderRadius.all(
-                      Radius.circular(9.0)
-                  )
-              )
-          )
+    return TextFormField(
+      onChanged: (value) {
+        websiteURL = value;
+      },
+      keyboardType: TextInputType.url,
+      decoration: const InputDecoration(
+        labelText: 'Website URL',
+        helperText: 'Optional',
+        prefixIcon: Icon(Icons.link),
       ),
     );
   }
@@ -157,42 +124,29 @@ class _PasswordFieldState extends State<PasswordField> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: TextFormField(
-        controller: PasswordField.pwd,
-        readOnly: !widget.enabled,
-        obscureText: _obscure,
-        decoration: InputDecoration(
-          hintText: widget.hint.isEmpty ? 'Password' : null,
-          filled: true,
-          fillColor: const Color(0xFFF8F3FF), // adjust if needed
-          prefixIcon: const Icon(Icons.key, color: Colors.green),
-          suffixIcon: IconButton(
-            icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
-            onPressed: () => setState(() => _obscure = !_obscure),
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade400),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.blue),
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 14,
-          ),
+    return TextFormField(
+      controller: PasswordField.pwd,
+      readOnly: !widget.enabled,
+      obscureText: _obscure,
+      autocorrect: false,
+      enableSuggestions: false,
+      // Monospace, so a generated password can be read off the screen without
+      // guessing between l, I and 1.
+      style: const TextStyle(fontFamily: 'monospace', letterSpacing: 0.5),
+      decoration: InputDecoration(
+        labelText: 'Password',
+        hintText: widget.enabled ? 'Type a password' : 'Press Generate',
+        prefixIcon: const Icon(Icons.key_outlined),
+        suffixIcon: IconButton(
+          icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
+          tooltip: _obscure ? 'Show password' : 'Hide password',
+          onPressed: () => setState(() => _obscure = !_obscure),
         ),
-        validator: (value) {
-          if (value == null || value.isEmpty) return 'Password required';
-          return null;
-        },
       ),
+      validator: (value) {
+        if (value == null || value.isEmpty) return 'Password required';
+        return null;
+      },
     );
   }
 }
