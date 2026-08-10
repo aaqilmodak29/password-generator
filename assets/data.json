@@ -1,0 +1,14 @@
+[
+    {
+        "userEmail": "someone@example.com",
+        "webName": "Example Store",
+        "webURL": "example.com",
+        "pwd": "REPLACE_ME"
+    },
+    {
+        "userEmail": "another@example.com",
+        "webName": "Example Mail",
+        "webURL": "mail.example.com",
+        "pwd": "REPLACE_ME"
+    }
+]

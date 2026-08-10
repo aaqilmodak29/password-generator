@@ -1,0 +1,19 @@
+# Normalise line endings in the repository to LF.
+#
+# Development happens on Windows but CI runs on Linux, so without this the two
+# disagree about every line of every file. Git stores LF and checks out CRLF
+# locally; the working copy is unaffected.
+* text=auto
+
+# Binary assets, so Git never tries to normalise or diff them as text.
+*.png binary
+*.jpg binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.jks binary
+*.keystore binary
+
+# Gradle's wrapper script must keep LF even on Windows checkouts — CI runs it
+# through a POSIX shell, which fails on CRLF with a confusing "not found".
+gradlew text eol=lf
