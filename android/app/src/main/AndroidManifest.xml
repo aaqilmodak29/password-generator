@@ -12,7 +12,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:label="Password Generator"
+        android:label="Password Manager"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -28,6 +28,14 @@ class BackupException implements Exception {
 class BackupService {
   /// Identifies our own files, so picking the wrong one fails clearly instead
   /// of as a decryption error that reads like a wrong passphrase.
+  ///
+  /// Keeps the old name after the app was renamed to Password Manager. It is
+  /// written into every backup ever exported and checked on import, so
+  /// changing it would make existing backups unreadable — for an app whose
+  /// backups are the only route off a device, that is not a rename, it is data
+  /// loss. [suggestedName] stays aligned with it for the same reason: a
+  /// filename that disagrees with the format id invites someone to "fix" the
+  /// id later.
   static const formatId = 'password-generator-backup';
   static const formatVersion = 1;
 
@@ -126,13 +134,13 @@ class BackupService {
       envelope = decoded;
     } on FormatException {
       throw const BackupException(
-        'That file is not a Password Generator backup.',
+        'That file is not a Password Manager backup.',
       );
     }
 
     if (envelope['format'] != formatId) {
       throw const BackupException(
-        'That file is not a Password Generator backup.',
+        'That file is not a Password Manager backup.',
       );
     }
     // Guards against a future format being read by an older build, which would

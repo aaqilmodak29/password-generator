@@ -1,4 +1,4 @@
-# Password Generator
+# Password Manager
 
 A personal password manager built in Flutter. Generates passwords, stores them
 on the device, and keeps them behind the device lock.
