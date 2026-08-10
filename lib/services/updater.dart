@@ -59,6 +59,15 @@ class Updater extends ChangeNotifier {
 
   UpdateStatus get status => _status;
   Release? get release => _release;
+
+  /// Whether the navigation bar should badge the tab holding the updater.
+  ///
+  /// Only when there is genuinely something newer. Badging while the check is
+  /// still running, or after it failed, trains people to ignore the badge —
+  /// and a badge that is sometimes noise is worse than no badge, because the
+  /// one time it matters it gets dismissed with the rest.
+  static bool showsBadge(UpdateStatus status) =>
+      status == UpdateStatus.available;
   String? get message => _message;
   double get progress => _progress;
   String get currentVersion => _currentVersion;

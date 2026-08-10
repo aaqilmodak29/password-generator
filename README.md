@@ -95,9 +95,13 @@ harmless and an import never overwrites a password you have since changed.
 
 ## Releases and updates
 
-The app checks this repository's latest GitHub Release on opening the **More**
-tab, and offers to download and install a newer one. Nothing has to be copied
-to the phone by hand.
+The app checks this repository's latest GitHub Release **at launch**. If there
+is a newer one, the **More** tab is badged; open it to see what changed and
+install. Nothing has to be copied to the phone by hand.
+
+The check is quiet: no signal, or GitHub being unreachable, leaves the app
+looking exactly as it did. The badge appears only when there is genuinely
+something newer — never while checking, and never after a failed check.
 
 Cutting a release is one command:
 
