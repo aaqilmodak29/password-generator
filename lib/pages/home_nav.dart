@@ -65,22 +65,31 @@ class _HomeNavState extends State<HomeNav> {
         index: _index,
         children: _pages,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _index,
-        onTap: (i) => setState(() => _index = i),
-        items: [
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.password),
+      // NavigationBar rather than BottomNavigationBar: the latter is the
+      // Material 2 component and ignores most of the app's theme, which is
+      // why it looked out of place next to everything else.
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _index,
+        onDestinationSelected: (i) => setState(() => _index = i),
+        destinations: [
+          const NavigationDestination(
+            icon: Icon(Icons.password_outlined),
+            selectedIcon: Icon(Icons.password),
             label: 'Generator',
           ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.list_alt),
+          const NavigationDestination(
+            icon: Icon(Icons.list_alt_outlined),
+            selectedIcon: Icon(Icons.list_alt),
             label: 'Passwords',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             // A dot rather than a count: there is only ever one newer release,
             // and a number would imply otherwise.
             icon: Badge(
+              isLabelVisible: badged,
+              child: const Icon(Icons.settings_outlined),
+            ),
+            selectedIcon: Badge(
               isLabelVisible: badged,
               child: const Icon(Icons.settings),
             ),
