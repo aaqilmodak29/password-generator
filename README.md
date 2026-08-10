@@ -74,8 +74,9 @@ Uninstalling the app destroys both the database and the key that decrypts it,
 so **export before you uninstall** — there is no other way to get your
 passwords back.
 
-The Backup tab writes every entry to a `.pgbackup` file encrypted under a
-passphrase you choose:
+The Backup tab writes every entry to a `password-generator-backup-<date>.json`
+file encrypted under a passphrase you choose. It is JSON only in the sense that
+the envelope is — the passwords inside it are ciphertext:
 
 | | |
 | --- | --- |
