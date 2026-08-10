@@ -1,0 +1,113 @@
+# Builds a signed APK and publishes it as a GitHub Release.
+#
+# Triggered by a version tag, so cutting a release is:
+#
+#     git tag v1.1.0 && git push origin v1.1.0
+#
+# The app polls this repository's latest release and offers to install it, so
+# this workflow is the whole update mechanism — nothing has to be copied to the
+# phone by hand.
+#
+# Two things have to line up for an update to actually install:
+#
+#   * the APK must be signed with the same key as the installed app, hence the
+#     keystore secrets rather than Flutter's per-machine debug key
+#   * versionCode must increase, which is why build-number comes from the run
+#     number rather than pubspec
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version to build, e.g. v1.1.0'
+        required: true
+
+# Only what publishing a release needs. The default token is otherwise
+# read-only, so a compromised step cannot touch anything else.
+permissions:
+  contents: write
+
+jobs:
+  android:
+    # Forks get no secrets, so this could only fail confusingly there — and it
+    # must never publish a release under this repository's name.
+    if: github.repository == 'aaqilmodak29/password-generator'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Work out the version
+        id: version
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          # v1.1.0 -> 1.1.0, which is what package_info reports at runtime and
+          # what the in-app updater compares against.
+          echo "name=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.38.3
+          channel: stable
+          cache: true
+
+      - name: Restore the signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 is not set. A debug-signed APK cannot update an installed release, so this build would produce something nobody can install."
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > android-release.keystore
+          cat > android/key.properties <<EOF
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEYSTORE_PASSWORD
+          keyAlias=${KEY_ALIAS:-passwordgenerator}
+          storeFile=../../android-release.keystore
+          EOF
+
+      - name: Verify before shipping
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
+
+      - name: Build
+        run: |
+          flutter build apk --release \
+            --build-name=${{ steps.version.outputs.name }} \
+            --build-number=${{ github.run_number }}
+
+      - name: Fail if it came out debug-signed
+        # The Gradle config falls back to the debug key when key.properties is
+        # missing, which is right for a fresh clone but would silently publish
+        # an APK nobody can install over their existing app. Catch it here
+        # rather than on the phone.
+        run: |
+          APK=build/app/outputs/flutter-apk/app-release.apk
+          SIGNER=$(keytool -printcert -jarfile "$APK" | grep -m1 "Owner:")
+          echo "$SIGNER"
+          if echo "$SIGNER" | grep -q "CN=Android Debug"; then
+            echo "::error::This APK is debug-signed — the keystore secret did not apply."
+            exit 1
+          fi
+
+      - name: Name the artifact after its version
+        run: |
+          mv build/app/outputs/flutter-apk/app-release.apk \
+             password-generator-${{ steps.version.outputs.tag }}.apk
+          ls -la password-generator-*.apk
+
+      - name: Publish the release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          generate_release_notes: true
+          files: password-generator-${{ steps.version.outputs.tag }}.apk

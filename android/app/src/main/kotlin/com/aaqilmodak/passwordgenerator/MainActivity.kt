@@ -1,4 +1,4 @@
-package com.example.password_generator
+package com.aaqilmodak.passwordgenerator
 
 import android.os.Bundle
 import android.view.WindowManager

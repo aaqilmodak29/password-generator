@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 
+import 'package:password_generator/components/update_section.dart';
 import 'package:password_generator/services/backup_service.dart';
 import 'package:password_generator/services/local_storage_service.dart';
 
@@ -148,7 +149,7 @@ class _BackupPageState extends State<BackupPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Backup')),
+      appBar: AppBar(title: const Text('Backup & updates')),
       body: AbsorbPointer(
         absorbing: _busy,
         child: ListView(
@@ -177,6 +178,8 @@ class _BackupPageState extends State<BackupPage> {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+            const UpdateSection(),
             const SizedBox(height: 16),
 
             _section(
