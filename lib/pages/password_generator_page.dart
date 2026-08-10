@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:password_generator/components/password_generator_components.dart';
 import 'package:uuid/uuid.dart';
 import '../services/local_storage_service.dart';
@@ -168,8 +169,19 @@ class _PasswordGeneratorPageState extends State<PasswordGeneratorPage> {
                               passwordToSave,
                             );
 
+                            // Saved first, then copied. A password on the
+                            // clipboard that never reached the database is the
+                            // worst outcome here — it gets pasted into a signup
+                            // form and then lost the moment anything else is
+                            // copied.
+                            await Clipboard.setData(
+                              ClipboardData(text: passwordToSave),
+                            );
+
                             messenger.showSnackBar(
-                              const SnackBar(content: Text('Saved')),
+                              const SnackBar(
+                                content: Text('Saved and copied to clipboard'),
+                              ),
                             );
                           }
                         },
