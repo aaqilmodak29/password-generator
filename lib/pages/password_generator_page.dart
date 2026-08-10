@@ -15,8 +15,34 @@ List letters = [
 ];
 List symbols = ['!', '#', '^', '%', '&', '(', ')', '*', '+'];
 
-extension Shuffle on String {
-  String get shuffled => (split('')..shuffle()).join('');
+/// The source of every generated password.
+///
+/// `Random.secure()`, never plain `Random()`. Dart's default `Random` is a
+/// fast pseudo-random generator seeded from the clock — reproducible by
+/// anyone who can guess when a password was created, which for a password
+/// manager makes the generated passwords guessable rather than random. It is
+/// the one place in this app where the choice of RNG is load-bearing.
+final Random _secureRandom = Random.secure();
+
+/// Generates a password: four digits, four letters, four symbols, shuffled.
+///
+/// Takes its randomness so tests can supply a seeded generator and assert the
+/// output is a pure function of it. Defaults to the secure source; a caller
+/// passing a plain `Random` is doing so knowingly, which is the point.
+String generatePassword({Random? random}) {
+  final rng = random ?? _secureRandom;
+
+  final chars = <String>[
+    for (var i = 0; i < 4; i++) numbers[rng.nextInt(numbers.length)] as String,
+    for (var i = 0; i < 4; i++) letters[rng.nextInt(letters.length)] as String,
+    for (var i = 0; i < 4; i++) symbols[rng.nextInt(symbols.length)] as String,
+  ];
+
+  // Shuffled with the same generator. `List.shuffle()` with no argument uses
+  // the default insecure Random, which would have left the ordering
+  // predictable even once the character choices were not.
+  chars.shuffle(rng);
+  return chars.join();
 }
 
 class PasswordGeneratorPage extends StatefulWidget {
@@ -30,23 +56,10 @@ class _PasswordGeneratorPageState extends State<PasswordGeneratorPage> {
   final _passwordGeneratorFormKey = GlobalKey<FormState>();
   bool enabledField = false; // true = manual typing
   String hintField = '';
-  final _random = Random();
   final DatabaseService _databaseService = DatabaseService.instance;
 
   String randomPass() {
-    String password = '';
-    for (int num = 0; num <= 3; num++) {
-      password += numbers[_random.nextInt(numbers.length)];
-    }
-    for (int let = 0; let <= 3; let++) {
-      password += letters[_random.nextInt(letters.length)];
-    }
-    for (int sym = 0; sym <= 3; sym++) {
-      password += symbols[_random.nextInt(symbols.length)];
-    }
-
-    password = password.shuffled;
-    passwd = password;
+    passwd = generatePassword();
     return passwd;
   }
 
