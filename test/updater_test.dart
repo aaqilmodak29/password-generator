@@ -78,6 +78,39 @@ void main() {
     });
   });
 
+  group('showsBadge', () {
+    test('badges only when an update is genuinely available', () {
+      expect(Updater.showsBadge(UpdateStatus.available), isTrue);
+    });
+
+    test('stays silent for every other state', () {
+      // A badge that appears while checking, or after a failed check on a
+      // train, teaches people to dismiss it — and then it is ignored the one
+      // time it matters. Enumerated rather than tested by negation so a new
+      // status has to be considered here deliberately.
+      for (final status in [
+        UpdateStatus.idle,
+        UpdateStatus.checking,
+        UpdateStatus.upToDate,
+        UpdateStatus.downloading,
+        UpdateStatus.ready,
+        UpdateStatus.failed,
+      ]) {
+        expect(
+          Updater.showsBadge(status),
+          isFalse,
+          reason: '$status must not badge the tab',
+        );
+      }
+    });
+
+    test('covers every UpdateStatus', () {
+      // Guards the list above: adding a status without deciding whether it
+      // badges should fail here rather than pass by omission.
+      expect(UpdateStatus.values, hasLength(7));
+    });
+  });
+
   group('summarise', () {
     test('keeps the human half of a generated changelog', () {
       const notes = '''

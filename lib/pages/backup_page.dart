@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:password_generator/components/update_section.dart';
 import 'package:password_generator/services/backup_service.dart';
 import 'package:password_generator/services/local_storage_service.dart';
+import 'package:password_generator/services/updater.dart';
 
 /// Export and import of the password database.
 ///
@@ -15,7 +16,11 @@ import 'package:password_generator/services/local_storage_service.dart';
 /// this page there is no way off a given install — including the move from a
 /// debug-signed build to a signed release, which requires an uninstall.
 class BackupPage extends StatefulWidget {
-  const BackupPage({super.key});
+  const BackupPage({super.key, required this.updater});
+
+  /// Shared with the navigation bar's badge, so both show the same answer.
+  /// Created and disposed by [HomeNav].
+  final Updater updater;
 
   @override
   State<BackupPage> createState() => _BackupPageState();
@@ -179,7 +184,7 @@ class _BackupPageState extends State<BackupPage> {
               ),
             ),
             const SizedBox(height: 16),
-            const UpdateSection(),
+            UpdateSection(updater: widget.updater),
             const SizedBox(height: 16),
 
             _section(
