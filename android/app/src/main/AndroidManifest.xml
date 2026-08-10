@@ -4,12 +4,19 @@
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
 
+    <!-- The in-app updater downloads a release APK and hands it to the system
+         installer. Without this the handoff is refused and the app can only
+         tell you to go and download the file yourself. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <!-- Checking GitHub for a newer release. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
-        android:label="password_generator"
+        android:label="Password Generator"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
-            android:name="com.example.password_generator.MainActivity"
+            android:name="com.aaqilmodak.passwordgenerator.MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
             android:taskAffinity=""

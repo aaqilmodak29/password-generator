@@ -39,8 +39,8 @@ class _HomeNavState extends State<HomeNav> {
             label: 'Passwords',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.backup),
-            label: 'Backup',
+            icon: Icon(Icons.settings),
+            label: 'More',
           ),
         ],
       ),

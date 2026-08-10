@@ -83,6 +83,63 @@ Importing adds entries that aren't already present, matched on their stored id.
 Anything already there is left untouched, so importing the same file twice is
 harmless and an import never overwrites a password you have since changed.
 
+## Releases and updates
+
+The app checks this repository's latest GitHub Release on opening the **More**
+tab, and offers to download and install a newer one. Nothing has to be copied
+to the phone by hand.
+
+Cutting a release is one command:
+
+```bash
+git tag v1.1.0 && git push origin v1.1.0
+```
+
+That triggers `.github/workflows/release.yml`, which analyses, tests, builds a
+signed APK and publishes it as a release. `versionCode` comes from the workflow
+run number rather than `pubspec.yaml`, because Android refuses an update whose
+`versionCode` has not increased.
+
+### Why signing matters
+
+Android will only install an update signed with the **same key** as the
+installed app. Flutter's default debug key is generated per machine, so a
+debug-signed build can only ever be updated from the one computer that made it.
+Releases therefore use a stable keystore, held in repository secrets and never
+committed.
+
+`android/build.gradle.kts` falls back to the debug key when `key.properties` is
+absent, so a fresh clone still builds — but it logs a warning, and the release
+workflow fails outright rather than publishing an APK nobody can install.
+
+### One-time setup
+
+Generate a keystore and keep it somewhere safe **outside** this repository —
+if you lose it, you can never update an installed app again and everyone has
+to uninstall and start over:
+
+```bash
+keytool -genkey -v -keystore password-generator.keystore -alias passwordgenerator -keyalg RSA -keysize 2048 -validity 10000
+```
+
+Then add three repository secrets under **Settings → Secrets and variables →
+Actions**:
+
+| Secret | Value |
+| --- | --- |
+| `ANDROID_KEYSTORE_BASE64` | `base64 -w0 password-generator.keystore` |
+| `ANDROID_KEYSTORE_PASSWORD` | the password you chose |
+| `ANDROID_KEY_ALIAS` | `passwordgenerator` |
+
+To build a signed APK locally, create `android/key.properties` (gitignored):
+
+```properties
+storePassword=...
+keyPassword=...
+keyAlias=passwordgenerator
+storeFile=/absolute/path/to/password-generator.keystore
+```
+
 ## Development
 
 ```bash

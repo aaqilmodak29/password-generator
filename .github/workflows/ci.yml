@@ -1,0 +1,51 @@
+# Analyze and test on every push and pull request.
+#
+# Deliberately has **no secrets and no write permissions**. A pull request can
+# change the workflow it runs under, so a job that holds nothing worth stealing
+# and can write nothing gains a hostile PR nothing — the review can then be
+# about the code rather than about whether it is safe to run.
+#
+# Releasing is a separate workflow, triggered only by a tag, which only
+# collaborators can push. That is where the signing keystore lives.
+#
+# This is the check to require in branch protection for `main`.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Read-only. Nothing here needs to write to the repository.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: 3.38.3
+          channel: stable
+          cache: true
+
+      - name: Analyze
+        run: |
+          flutter pub get
+          flutter analyze
+
+      - name: Test
+        run: flutter test
+
+      - name: Build (unsigned, just to prove it compiles)
+        # No keystore here, so this exercises the path a fresh clone takes: the
+        # release falls back to the debug key with a warning rather than the
+        # build failing.
+        run: flutter build apk --debug
