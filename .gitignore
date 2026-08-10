@@ -1,0 +1,61 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Signing material. android/.gitignore already covers key.properties and
+# keystores under android/, but the release workflow writes the keystore it
+# reconstructs from a secret to the repository root, so cover that too. A
+# keystore in git would let anyone publish an update that installs over this
+# app, so this is worth stating twice rather than nowhere.
+*.jks
+*.keystore
+key.properties
+
+# Build-time configuration reconstructed from CI secrets, never committed.
+.env
+
+# Exported password backups. The export is passphrase-encrypted, but an
+# encrypted dump of every credential still has no business in a repository.
+*.pgbackup
