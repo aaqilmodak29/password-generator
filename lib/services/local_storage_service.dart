@@ -314,8 +314,16 @@ class DatabaseService {
 
   Future<List<Passwords>> getAddedPasswords() async {
     final db = await database;
+    // Newest first. There is no timestamp column, but SQLite hands every row a
+    // rowid in insertion order, so this needs no schema change and no
+    // migration of a database holding real passwords.
+    //
+    // Reuse after a delete does not disturb it: SQLite only reuses the highest
+    // rowid, and a row taking that slot is the newest one anyway. An imported
+    // backup keeps its order too, since entries are re-inserted in file order.
     final data = await db.query(
       _passGenTable,
+      orderBy: 'rowid DESC',
     );
     List<Passwords> addedPasswords = data.map((e) => Passwords(
         id: e[_uuid] as String,
