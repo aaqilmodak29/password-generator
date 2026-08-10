@@ -89,11 +89,28 @@ jobs:
         # missing, which is right for a fresh clone but would silently publish
         # an APK nobody can install over their existing app. Catch it here
         # rather than on the phone.
+        #
+        # apksigner, not keytool. `keytool -printcert -jarfile` only reads v1
+        # (JAR) signatures, and minSdk is 24, so AGP signs with APK Signature
+        # Scheme v2/v3 and writes no v1 block at all. keytool printed "Not a
+        # signed jar file", grep matched nothing and exited 1, and `bash -e`
+        # failed the step — on a correctly signed APK. The check was reporting
+        # its own blind spot as a signing failure.
         run: |
           APK=build/app/outputs/flutter-apk/app-release.apk
-          SIGNER=$(keytool -printcert -jarfile "$APK" | grep -m1 "Owner:")
-          echo "$SIGNER"
-          if echo "$SIGNER" | grep -q "CN=Android Debug"; then
+
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1)
+          if [ -z "$APKSIGNER" ]; then
+            echo "::error::apksigner not found under $ANDROID_HOME/build-tools."
+            exit 1
+          fi
+
+          # Also the "is it signed at all" check: apksigner exits non-zero on an
+          # unsigned or malformed APK, and `bash -e` turns that into a failure.
+          CERTS=$("$APKSIGNER" verify --print-certs "$APK")
+          echo "$CERTS"
+
+          if echo "$CERTS" | grep -q "CN=Android Debug"; then
             echo "::error::This APK is debug-signed — the keystore secret did not apply."
             exit 1
           fi
