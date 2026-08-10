@@ -35,6 +35,12 @@ class _BackupPageState extends State<BackupPage> {
   String? _pickedName;
   Uint8List? _pickedBytes;
 
+  // Per-field rather than one shared flag: revealing the passphrase you are
+  // confirming defeats the point of asking twice.
+  bool _showExportPass = false;
+  bool _showExportConfirm = false;
+  bool _showImportPass = false;
+
   @override
   void dispose() {
     _exportPass.dispose();
@@ -196,24 +202,22 @@ class _BackupPageState extends State<BackupPage> {
                   'anywhere — if you forget it, the file is unreadable.',
                 ),
                 const SizedBox(height: 16),
-                TextField(
+                _passphraseField(
                   controller: _exportPass,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Passphrase',
-                    helperText:
-                        'At least ${BackupService.minPassphraseLength} characters',
-                    border: OutlineInputBorder(),
-                  ),
+                  label: 'Passphrase',
+                  helperText:
+                      'At least ${BackupService.minPassphraseLength} characters',
+                  visible: _showExportPass,
+                  onToggle: () =>
+                      setState(() => _showExportPass = !_showExportPass),
                 ),
                 const SizedBox(height: 12),
-                TextField(
+                _passphraseField(
                   controller: _exportConfirm,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm passphrase',
-                    border: OutlineInputBorder(),
-                  ),
+                  label: 'Confirm passphrase',
+                  visible: _showExportConfirm,
+                  onToggle: () =>
+                      setState(() => _showExportConfirm = !_showExportConfirm),
                 ),
                 const SizedBox(height: 16),
                 FilledButton.icon(
@@ -239,13 +243,12 @@ class _BackupPageState extends State<BackupPage> {
                   label: Text(_pickedName ?? 'Choose a backup file'),
                 ),
                 const SizedBox(height: 12),
-                TextField(
+                _passphraseField(
                   controller: _importPass,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Passphrase',
-                    border: OutlineInputBorder(),
-                  ),
+                  label: 'Passphrase',
+                  visible: _showImportPass,
+                  onToggle: () =>
+                      setState(() => _showImportPass = !_showImportPass),
                 ),
                 const SizedBox(height: 16),
                 FilledButton.icon(
@@ -265,6 +268,35 @@ class _BackupPageState extends State<BackupPage> {
               ),
             ],
           ],
+        ),
+      ),
+    );
+  }
+
+  /// A passphrase field with a reveal toggle.
+  ///
+  /// Typing a long passphrase blind, twice, into an obscured box is how people
+  /// end up with an export they cannot open — and here a mistyped passphrase
+  /// is not recoverable, because nothing stores it to check against.
+  Widget _passphraseField({
+    required TextEditingController controller,
+    required String label,
+    required bool visible,
+    required VoidCallback onToggle,
+    String? helperText,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: !visible,
+      autocorrect: false,
+      enableSuggestions: false,
+      decoration: InputDecoration(
+        labelText: label,
+        helperText: helperText,
+        suffixIcon: IconButton(
+          icon: Icon(visible ? Icons.visibility_off : Icons.visibility),
+          tooltip: visible ? 'Hide passphrase' : 'Show passphrase',
+          onPressed: onToggle,
         ),
       ),
     );
