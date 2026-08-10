@@ -89,6 +89,3 @@ harmless and an import never overwrites a password you have since changed.
 flutter analyze
 flutter test
 ```
-
-`assets/data.json` is leftover scaffolding from an early prototype. Nothing
-reads it; it contains placeholder values only.
