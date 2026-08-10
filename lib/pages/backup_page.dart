@@ -80,7 +80,15 @@ class _BackupPageState extends State<BackupPage> {
       final saved = await FileSaver.instance.saveAs(
         name: BackupService.suggestedName(DateTime.now()),
         bytes: Uint8List.fromList(utf8.encode(contents)),
-        fileExtension: 'pgbackup',
+        // Extension and MIME type have to agree. They used to say 'pgbackup'
+        // and application/json, so file_saver wrote name.pgbackup and then
+        // Android's document picker appended .json to match the MIME type it
+        // had been given — every backup landed as name.pgbackup.json.
+        //
+        // JSON is what the file honestly is: an encrypted envelope encoded as
+        // JSON. Saying so means the name already ends in the extension the
+        // picker would add, so it adds nothing.
+        fileExtension: 'json',
         mimeType: MimeType.custom,
         customMimeType: 'application/json',
       );

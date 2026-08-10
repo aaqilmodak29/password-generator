@@ -58,4 +58,11 @@ key.properties
 
 # Exported password backups. The export is passphrase-encrypted, but an
 # encrypted dump of every credential still has no business in a repository.
+#
+# Backups are named password-generator-backup-<date>.json. Matched by that
+# prefix rather than by *.json, which would hide legitimate files. The old
+# .pgbackup and .pgbackup.json spellings stay covered so backups taken before
+# the extension was fixed are still ignored.
+password-generator-backup-*.json
 *.pgbackup
+*.pgbackup.json
