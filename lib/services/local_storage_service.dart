@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:password_generator/model/passwords.dart';
 import 'package:path/path.dart';
 
@@ -124,13 +125,13 @@ class DatabaseService {
     final databasePath = join(databaseDirPath, "pwd_gen.db");
 
     final file = File(databasePath);
-    print('Deleting database at: $databasePath');
+    debugPrint('Deleting database at: $databasePath');
 
     if (await file.exists()) {
       await deleteDatabase(databasePath);
-      print('Database deleted.');
+      debugPrint('Database deleted.');
     } else {
-      print('Database file not found.');
+      debugPrint('Database file not found.');
     }
   }
 
@@ -187,6 +188,47 @@ class DatabaseService {
       where: '$_uuid = ?',
       whereArgs: [id],
     );
+  }
+
+  /// Writes restored entries, returning how many were added and how many
+  /// already existed.
+  ///
+  /// Keyed on the stored uuid, so re-importing the same backup is harmless
+  /// rather than producing a second copy of every entry. Existing rows are
+  /// left alone: an import is a restore, and silently overwriting a password
+  /// the user has since changed would lose the newer one.
+  ///
+  /// The whole thing runs in a transaction so a failure part-way through
+  /// leaves the database as it was, rather than half-restored.
+  Future<({int added, int skipped})> importPasswords(
+    List<Passwords> entries,
+  ) async {
+    final db = await database;
+    var added = 0;
+
+    await db.transaction((txn) async {
+      for (final e in entries) {
+        final existing = await txn.query(
+          _passGenTable,
+          columns: [_uuid],
+          where: '$_uuid = ?',
+          whereArgs: [e.id],
+          limit: 1,
+        );
+        if (existing.isNotEmpty) continue;
+
+        await txn.insert(_passGenTable, {
+          _uuid: e.id,
+          _usernameColumnName: e.name,
+          _websiteColumnName: e.webName,
+          _websiteURLColumnName: e.webURL,
+          _pwd: e.pwd,
+        });
+        added++;
+      }
+    });
+
+    return (added: added, skipped: entries.length - added);
   }
 
   Future<List<Passwords>> getAddedPasswords() async {

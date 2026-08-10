@@ -34,9 +34,11 @@ lib/
     home_nav.dart                  bottom navigation
     password_generator_page.dart   generate and save a password
     view_passwords.dart            browse, edit and delete saved entries
+    backup_page.dart               encrypted export and import
   services/
     auth_gate.dart                 device-lock gate, re-locks on background
     local_storage_service.dart     encrypted database access
+    backup_service.dart            backup encryption and file format
   components/                      shared widgets
 ```
 
@@ -58,12 +60,28 @@ flutter build apk --release
 
 ## Backups
 
-There is currently **no export**, and uninstalling the app destroys both the
-database and the key that decrypts it. An uninstall is unrecoverable — treat it
-as deleting your passwords.
+Uninstalling the app destroys both the database and the key that decrypts it,
+so **export before you uninstall** — there is no other way to get your
+passwords back.
 
-An encrypted export/import is the next thing being added, which is what makes
-it safe to move between builds.
+The Backup tab writes every entry to a `.pgbackup` file encrypted under a
+passphrase you choose:
+
+| | |
+| --- | --- |
+| Key derivation | PBKDF2-HMAC-SHA256, 210,000 iterations, 16-byte random salt |
+| Encryption | AES-256-GCM, 12-byte random nonce |
+
+A fresh salt and nonce are generated per export, so exporting the same data
+twice produces different files. GCM authenticates the payload, so a modified
+file is rejected rather than decrypted into nonsense.
+
+The passphrase is never stored. **If you forget it the file is unreadable** —
+that is what makes it safe to keep the backup in ordinary storage.
+
+Importing adds entries that aren't already present, matched on their stored id.
+Anything already there is left untouched, so importing the same file twice is
+harmless and an import never overwrites a password you have since changed.
 
 ## Development
 

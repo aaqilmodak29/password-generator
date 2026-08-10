@@ -155,6 +155,11 @@ class _PasswordGeneratorPageState extends State<PasswordGeneratorPage> {
                             final passwordToSave = PasswordField.pwd.text.trim();
                             passwd = passwordToSave;
 
+                            // Resolved before the await: afterwards this
+                            // closure's context may be gone, and the State's
+                            // `mounted` says nothing about it.
+                            final messenger = ScaffoldMessenger.of(context);
+
                             await _databaseService.addPwd(
                               id,
                               emailUser,
@@ -163,8 +168,7 @@ class _PasswordGeneratorPageState extends State<PasswordGeneratorPage> {
                               passwordToSave,
                             );
 
-                            if (!mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            messenger.showSnackBar(
                               const SnackBar(content: Text('Saved')),
                             );
                           }
