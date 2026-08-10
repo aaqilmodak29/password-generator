@@ -4,19 +4,18 @@ description: "A new Flutter project."
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-# The following defines the version and build number for your application.
-# A version number is three numbers separated by dots, like 1.2.43
-# followed by an optional build number separated by a +.
-# Both the version and the builder number may be overridden in flutter
-# build by specifying --build-name and --build-number, respectively.
-# In Android, build-name is used as versionName while build-number used as versionCode.
-# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
-# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
-# Read more about iOS versioning at
-# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-# In Windows, build-name is used as the major, minor, and patch parts
-# of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+# Version of the code currently on main, kept as documentation.
+#
+# Releases do not read it. .github/workflows/release.yml passes --build-name
+# from the git tag and --build-number from the workflow run number, because
+# Android refuses an update whose versionCode has not increased and pubspec
+# cannot promise that. The tag is what decides the version a release ships as;
+# bumping this line does not cut one.
+#
+# It matters anyway for local builds, and because it is the first thing anyone
+# reads to find out what version this code is — which is why it had drifted
+# five releases behind before being noticed.
+version: 1.1.2+1
 
 environment:
   sdk: ^3.7.2
