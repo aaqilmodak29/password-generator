@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # It matters anyway for local builds, and because it is the first thing anyone
 # reads to find out what version this code is — which is why it had drifted
 # five releases behind before being noticed.
-version: 1.1.2+1
+version: 1.2.0+1
 
 environment:
   sdk: ^3.7.2
