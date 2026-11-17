@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
 import 'package:password_generator/services/auth_gate.dart';
+import 'package:password_generator/services/shared_backup.dart';
 
 import 'pages/home_nav.dart';
 import 'theme.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SharedBackup.instance.init();
   runApp(const MyApp());
 }
 

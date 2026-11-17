@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:password_generator/services/shared_backup.dart';
 import 'package:password_generator/services/updater.dart';
 
 import 'backup_page.dart';
@@ -14,6 +15,7 @@ class HomeNav extends StatefulWidget {
 }
 
 class _HomeNavState extends State<HomeNav> {
+  static const _backupIndex = 2;
   int _index = 0;
 
   /// One updater for the whole app: the More tab renders it, and the
@@ -43,14 +45,25 @@ class _HomeNavState extends State<HomeNav> {
     _updater.check();
 
     _updater.addListener(_onUpdaterChanged);
+
+    SharedBackup.instance.pending.addListener(_onShared);
+    if (SharedBackup.instance.pending.value != null) _index = _backupIndex;
   }
 
   void _onUpdaterChanged() {
     if (mounted) setState(() {});
   }
 
+  // A shared backup goes to the More tab, where the import lives.
+  void _onShared() {
+    if (SharedBackup.instance.pending.value != null && mounted) {
+      setState(() => _index = _backupIndex);
+    }
+  }
+
   @override
   void dispose() {
+    SharedBackup.instance.pending.removeListener(_onShared);
     _updater.removeListener(_onUpdaterChanged);
     _updater.dispose();
     super.dispose();
