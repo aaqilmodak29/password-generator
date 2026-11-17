@@ -77,6 +77,20 @@ class _PasswordGeneratorPageState extends State<PasswordGeneratorPage> {
     });
   }
 
+  void _clear() {
+    // reset() empties the text fields and their errors, but skips the globals
+    // (no onChanged) and the password, whose controller is shared.
+    _passwordGeneratorFormKey.currentState!.reset();
+    PasswordField.pwd.clear();
+    setState(() {
+      emailUser = '';
+      websiteName = '';
+      websiteURL = '';
+      passwd = '';
+      hintField = '';
+    });
+  }
+
   Future<void> _save() async {
     if (!_passwordGeneratorFormKey.currentState!.validate()) return;
 
@@ -176,6 +190,17 @@ class _PasswordGeneratorPageState extends State<PasswordGeneratorPage> {
               onPressed: _save,
               icon: const Icon(Icons.save_outlined),
               label: const Text('Save password'),
+            ),
+            const SizedBox(height: 12),
+
+            OutlinedButton.icon(
+              onPressed: _clear,
+              style: OutlinedButton.styleFrom(
+                backgroundColor: theme.scaffoldBackgroundColor,
+                side: BorderSide(color: theme.colorScheme.primary),  // Save's fill colour
+              ),
+              icon: const Icon(Icons.clear),
+              label: const Text('Clear fields'),
             ),
           ],
         ),
