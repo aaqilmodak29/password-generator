@@ -48,6 +48,12 @@ jobs:
           # what the in-app updater compares against.
           echo "name=${TAG#v}" >> "$GITHUB_OUTPUT"
 
+      # Pinned: ubuntu-latest moved to a JDK 25 default, which Gradle 8.10 can't run on.
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
           flutter-version: 3.38.3
