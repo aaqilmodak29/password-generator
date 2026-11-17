@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:password_generator/components/update_section.dart';
 import 'package:password_generator/services/backup_service.dart';
 import 'package:password_generator/services/local_storage_service.dart';
+import 'package:password_generator/services/shared_backup.dart';
 import 'package:password_generator/services/updater.dart';
 
 /// Export and import of the password database.
@@ -42,7 +43,41 @@ class _BackupPageState extends State<BackupPage> {
   bool _showImportPass = false;
 
   @override
+  void initState() {
+    super.initState();
+    SharedBackup.instance.pending.addListener(_onShared);
+    _onShared();
+  }
+
+  // Deferred to after the frame so HomeNav has seen the file before it's taken.
+  void _onShared() {
+    if (SharedBackup.instance.pending.value == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _takeShared();
+    });
+    WidgetsBinding.instance.scheduleFrame();
+  }
+
+  void _takeShared() {
+    final file = SharedBackup.instance.take();
+    if (file == null) return;
+
+    final bytes = file.bytes;
+    if (bytes == null) {
+      _say(file.error ?? "Couldn't read ${file.name}.", bad: true);
+      return;
+    }
+
+    setState(() {
+      _pickedName = file.name;
+      _pickedBytes = bytes;
+    });
+    _say('Loaded ${file.name}. Enter its passphrase and tap Restore.');
+  }
+
+  @override
   void dispose() {
+    SharedBackup.instance.pending.removeListener(_onShared);
     _exportPass.dispose();
     _exportConfirm.dispose();
     _importPass.dispose();

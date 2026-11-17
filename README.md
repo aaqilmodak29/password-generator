@@ -49,6 +49,7 @@ lib/
     auth_gate.dart                 device-lock gate, re-locks on background
     local_storage_service.dart     encrypted database access
     backup_service.dart            backup encryption and file format
+    shared_backup.dart             backup files shared in from other apps
   components/                      shared widgets
 ```
 
@@ -89,6 +90,11 @@ file is rejected rather than decrypted into nonsense.
 
 The passphrase is never stored. **If you forget it the file is unreadable** —
 that is what makes it safe to keep the backup in ordinary storage.
+
+To import on Android, either choose the file from the Backup tab or share it
+into the app (Share > Password Manager, e.g. from WhatsApp, or Open with from a
+file manager). Sharing opens the Backup tab with the file already chosen, which
+matters for files the system picker can't see, like WhatsApp's documents.
 
 Importing adds entries that aren't already present, matched on their stored id.
 Anything already there is left untouched, so importing the same file twice is
